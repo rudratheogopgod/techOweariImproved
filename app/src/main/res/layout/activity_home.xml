@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Home"
+    app:layout_anchorGravity="center"
+    android:paddingVertical="40dp"
+    android:paddingHorizontal="20dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_pic_text"
+        android:layout_width="60sp"
+        android:layout_height="60sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/user_coloured"
+        android:contentDescription="@string/profile"
+        />
+
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:textSize="@dimen/profile_des_size"
+        android:textColor="@color/black"
+        app:layout_constraintLeft_toRightOf="@id/profile_pic_text"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/username"/>
+
+    <TextView
+        android:id="@+id/uers_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:textSize="@dimen/profile_des_size"
+        android:textColor="@color/black"
+        app:layout_constraintLeft_toRightOf="@id/profile_pic_text"
+        app:layout_constraintTop_toBottomOf="@id/user_name"
+        android:text="@string/age"/>
+
+    <ImageView
+        android:id="@+id/slider"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="@dimen/_15dp"
+        android:contentDescription="@string/slider"
+        android:padding="3dp"
+        android:background="@drawable/rounded_corners"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_pic_text"
+        android:src="@drawable/dummy_image" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/emergency_button"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:background="@drawable/home_button"
+        android:text="@string/check_pulse"
+        android:fontFamily="@font/work_sans_bold"
+        android:textColor="@color/black"
+        app:icon="@drawable/emergency"
+        app:iconGravity="textTop"
+        app:iconSize="80dp"
+        app:iconTint="@null"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/location_button"
+        app:layout_constraintTop_toBottomOf="@id/slider"
+        android:layout_marginTop="50sp"
+        app:layout_constraintHorizontal_weight="1"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/location_button"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:background="@drawable/home_button"
+        android:text="@string/location"
+        android:fontFamily="@font/work_sans_bold"
+        android:textColor="@color/black"
+        app:icon="@drawable/location"
+        app:iconGravity="textTop"
+        app:iconSize="80dp"
+        app:iconTint="@null"
+        app:layout_constraintTop_toBottomOf="@id/slider"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/emergency_button"
+        android:layout_marginTop="50sp"
+        app:layout_constraintHorizontal_weight="1"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/hospital"
+        android:background="@drawable/home_button"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="20sp"
+        android:text="@string/hospital"
+        android:fontFamily="@font/work_sans_bold"
+        android:textColor="@color/black"
+        app:icon="@drawable/hospital_icon"
+        app:iconGravity="textTop"
+        app:iconSize="80dp"
+        app:iconTint="@null"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/police"
+        app:layout_constraintTop_toBottomOf="@id/emergency_button" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/police"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/call_for_help"
+        android:fontFamily="@font/work_sans_bold"
+        android:textColor="@color/black"
+        app:icon="@drawable/police"
+        app:iconGravity="textTop"
+        app:iconSize="80dp"
+        app:iconTint="@null"
+        android:background="@drawable/home_button"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/hospital"
+        app:layout_constraintTop_toBottomOf="@id/location_button" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

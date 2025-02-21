@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "850293272976",
+    "firebase_url": "https://tech-kapda-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tech-kapda",
+    "storage_bucket": "tech-kapda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850293272976:android:e034761f6e9e8d34ca0315",
+        "android_client_info": {
+          "package_name": "com.example.techwear"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHJVegJTvG0xJahEMzU4wzC4wS7mdgry4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850293272976:android:85fd73978b9a1f9eca0315",
+        "android_client_info": {
+          "package_name": "com.example.techweartry4"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHJVegJTvG0xJahEMzU4wzC4wS7mdgry4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850293272976:android:ea7c2ee7a261ecbdca0315",
+        "android_client_info": {
+          "package_name": "com.example.testingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHJVegJTvG0xJahEMzU4wzC4wS7mdgry4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
