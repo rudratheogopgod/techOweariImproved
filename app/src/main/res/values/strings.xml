@@ -50,4 +50,5 @@
     <string name="text_advice_for_image">Note* - For proper SOS service we advice you to use a clear image of yourself, with a proper disclosure of your front profile.</string>
     <string name="select_a_picture">Select A Picture</string>
     <string name="emergency_message">Emergency Message</string>
+    <string name="title_activity_location">Location</string>
 </resources>

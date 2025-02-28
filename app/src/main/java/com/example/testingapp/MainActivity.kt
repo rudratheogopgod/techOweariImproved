@@ -1,5 +1,6 @@
 package com.example.testingapp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private var backPressedOnce = false
     private lateinit var binding: ActivityMainBinding //initializing the binding and firebase late in it var
     private lateinit var firebaseAuth: FirebaseAuth
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (checkLoginStatus(this)){
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                         progressBar.visibility = View.INVISIBLE
                         setLoggedInStatus(this, true)
                         Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this, userDetails::class.java)
+                        val intent = Intent(this, UserDetails::class.java)
                         startActivity(intent)
                         finish()
                     }else{
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
-    public fun checkLoginStatus(context: Context): Boolean{
+    fun checkLoginStatus(context: Context): Boolean{
         val sharePreferences = context.getSharedPreferences("LoginStatus", Context.MODE_PRIVATE)
         val status = sharePreferences.getBoolean("LOGIN_STATUS", false)//false as the default value
         return status

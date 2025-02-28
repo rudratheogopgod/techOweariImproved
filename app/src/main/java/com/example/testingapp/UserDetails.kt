@@ -1,5 +1,6 @@
 package com.example.testingapp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -7,8 +8,9 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.testingapp.databinding.ActivityUserDetailsBinding
 
-class userDetails : AppCompatActivity() {
+class UserDetails : AppCompatActivity() {
     lateinit var binding: ActivityUserDetailsBinding
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserDetailsBinding.inflate(layoutInflater)
@@ -39,7 +41,7 @@ class userDetails : AppCompatActivity() {
     }
 }
 
-private fun userDetails.saveUserData(
+private fun UserDetails.saveUserData(
     context: Context,
     fullName: String,
     bloodGroup: String,

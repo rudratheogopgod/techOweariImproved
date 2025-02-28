@@ -37,7 +37,7 @@ class Signup : AppCompatActivity() {
                     firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
                         if (it.isSuccessful){
                             progressBar.visibility = View.INVISIBLE
-                            val intent = Intent(this, userDetails::class.java)
+                            val intent = Intent(this, UserDetails::class.java)
                             startActivity(intent)
                             Toast.makeText(this, "Successfully Signed Up" , Toast.LENGTH_SHORT).show()
                             finish()

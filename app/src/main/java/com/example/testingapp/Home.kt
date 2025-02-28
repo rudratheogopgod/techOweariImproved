@@ -1,6 +1,7 @@
 package com.example.testingapp
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -40,6 +41,7 @@ class Home : AppCompatActivity() {
     private var currentLocation: LatLng? = null
     private var backPressedOnce = false
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
@@ -48,7 +50,7 @@ class Home : AppCompatActivity() {
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                locationResult ?: return
+                locationResult
                 for (location in locationResult.locations) {
                     currentLocation = LatLng(location.latitude, location.longitude)
                     val loc = currentLocation
@@ -86,6 +88,17 @@ class Home : AppCompatActivity() {
             "+91$checkNumber"
         }
 
+        //navigate to profile
+        binding.profilePic.setOnClickListener{
+            val intent = Intent(this, Profile::class.java)
+            startActivity(intent)
+        }
+
+        //navigate to hospital page
+        binding.hospital.setOnClickListener{
+            val intent = Intent(this, Hospital::class.java)
+            startActivity(intent)
+        }
 
         binding.userName.text = fullName
         binding.uersAge.text = "Age - $age"
@@ -103,7 +116,7 @@ class Home : AppCompatActivity() {
         if (fileName != null) {
             val bitmap = loadImageFromStorage(fileName)
             if (bitmap != null) {
-                binding.profilePicText.setImageBitmap(bitmap)
+                binding.profilePic.setImageBitmap(bitmap)
             }
         }
     }
@@ -127,8 +140,9 @@ class Home : AppCompatActivity() {
             }
             CALL_PHONE_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Call permission granted", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
         }
