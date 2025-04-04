@@ -42,7 +42,7 @@ class ImageTaking : AppCompatActivity() {
                 if (bitmap != null && fileName != null) {
                     savePhoto(fileName, bitmap)
                 } else {
-                    Toast.makeText(this, "Profile pic updation unsuccessful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Profile pic update unsuccessful", Toast.LENGTH_SHORT).show()
                 }
             }
         }

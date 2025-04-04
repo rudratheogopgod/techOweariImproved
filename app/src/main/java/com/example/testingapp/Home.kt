@@ -1,74 +1,49 @@
 package com.example.testingapp
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.example.testingapp.databinding.ActivityHomeBinding
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import android.Manifest
+import android.app.PendingIntent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.telephony.SmsManager
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.testingapp.databinding.ActivityHomeBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.io.FileInputStream
-
+import kotlin.text.matches
 
 class Home : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
+    private lateinit var database: DatabaseReference
     private var countdownTimer: CountDownTimer? = null
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
     private var currentLocation: LatLng? = null
     private var backPressedOnce = false
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult
-                for (location in locationResult.locations) {
-                    currentLocation = LatLng(location.latitude, location.longitude)
-                    val loc = currentLocation
-                    loc?.let {
-                        // Use the location data as needed
-                        Log.d("Location", "Current Location: ${it.latitude}, ${it.longitude}")
-                    }
-                }
-            }
-        }
-
-        // Request location permissions
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-        } else {
-            // Permissions already granted, start the service
-            startLocationUpdates()
-        }
 
         // Request SMS permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -76,39 +51,43 @@ class Home : AppCompatActivity() {
         }
 
         val sharedPreferences = getSharedPreferences("UserData", Context.MODE_PRIVATE)
-        val fullName = sharedPreferences.getString("FULL_NAME", "")
-        val age = sharedPreferences.getString("AGE", "")
-        val bloodGroup = sharedPreferences.getString("BLOOD_GROUP", "")
-        val healthConditions = sharedPreferences.getString("HEALTH_CONDITIONS", "")
-        val gender = sharedPreferences.getString("GENDER", "")
-        val checkNumber = sharedPreferences.getString("FAMILY_CONTACT", "")
-        val familyContact = if (checkNumber != null && checkNumber.matches("^\\+[0-9]{10,15}$".toRegex())) {
+        val fullName = sharedPreferences.getString("FULL_NAME", "") ?: ""
+        val age = sharedPreferences.getString("AGE", "") ?: ""
+        val bloodGroup = sharedPreferences.getString("BLOOD_GROUP", "") ?: ""
+        val healthConditions = sharedPreferences.getString("HEALTH_CONDITIONS", "") ?: ""
+        val gender = sharedPreferences.getString("GENDER", "") ?: ""
+        val latitude = sharedPreferences.getFloat("LATITUDE", 0.0f)
+        val longitude = sharedPreferences.getFloat("LONGITUDE", 0.0f)
+        val locationData = "geo:$latitude,$longitude"
+        val locationUrl = if (true) {
+            "http://maps.google.com/?q=${latitude},${longitude}"
+        } else {
+            "Location not available"
+        }
+        val checkNumber = sharedPreferences.getString("FAMILY_CONTACT", "") ?: ""
+        val familyContact = if (checkNumber.matches("^\\+[0-9]{10,15}$".toRegex())) {
             checkNumber
         } else {
-            "+91$checkNumber"
-        }
-
-        //navigate to profile
-        binding.profilePic.setOnClickListener{
-            val intent = Intent(this, Profile::class.java)
-            startActivity(intent)
-        }
-
-        //navigate to hospital page
-        binding.hospital.setOnClickListener{
-            val intent = Intent(this, Hospital::class.java)
-            startActivity(intent)
+            "+91$checkNumber" // Add country code if missing
         }
 
         binding.userName.text = fullName
-        binding.uersAge.text = "Age - $age"
+        binding.uersAge.text = "Age - ${age}"
 
-        binding.police.setOnClickListener{
+        binding.locationButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(locationData))
+            intent.setPackage("com.google.android.apps.maps")
+            startActivity(intent)
+        }
+
+        databaseListner(familyContact, fullName, bloodGroup, age, healthConditions, gender, locationUrl)
+
+        binding.police.setOnClickListener {
             makePhoneCall(familyContact)
         }
 
         binding.emergencyButton.setOnClickListener {
-            showConfirmationDialog(familyContact.toString(), fullName.toString(), bloodGroup.toString(), age.toString(), healthConditions.toString(), gender.toString())
+            sendSMS(familyContact,locationUrl, fullName, bloodGroup, age, healthConditions, gender)
             vibe(it)
         }
 
@@ -117,20 +96,54 @@ class Home : AppCompatActivity() {
             val bitmap = loadImageFromStorage(fileName)
             if (bitmap != null) {
                 binding.profilePic.setImageBitmap(bitmap)
+            } else {
+                Toast.makeText(this, "Failed to load profile picture", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Profile picture file not found", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun databaseListner(phoneNumber: String, userName: String, bloodGroup: String, age: String, healthConditions: String, gender: String, locationUrl: String) {
+        val context = this
+        val sharePreferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
+        val editor = sharePreferences.edit()
+        database = FirebaseDatabase.getInstance().getReference()
+
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Safely retrieve latitude and longitude as Float/Double and convert to String
+                    val lat = snapshot.child("user/latitude").value?.toString()?.toDouble() // Convert to String
+                    val longi = snapshot.child("user/longitude").value?.toString()?.toDouble() // Convert to String
+                    val status = snapshot.child("user/touch_status").value?.toString()?.toBoolean()
+
+                    if (lat != null && longi != null) {
+                        editor.putFloat("LATITUDE", lat.toFloat()) // Store as String
+                        editor.putFloat("LONGITUDE", longi.toFloat()) // Store as String
+                        editor.apply()
+
+                        if (status == true) {
+                            sendSMS(phoneNumber, locationUrl, userName, bloodGroup, healthConditions, gender, age)
+                        }
+                    } else {
+                        Toast.makeText(this@Home, "Invalid data in snapshot", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@Home, "Snapshot does not exist", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@Home, "Failed to read pulse data", Toast.LENGTH_SHORT).show()
             }
         }
+        database.addValueEventListener(postListener)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            LOCATION_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startLocationUpdates()
-                } else {
-                    Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
-                }
-            }
             SMS_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "SMS permission granted", Toast.LENGTH_SHORT).show()
@@ -140,9 +153,16 @@ class Home : AppCompatActivity() {
             }
             CALL_PHONE_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Call permission granted", Toast.LENGTH_SHORT).show()
+                    val sharedPreferences = getSharedPreferences("UserData", Context.MODE_PRIVATE)
+                    val checkNumber = sharedPreferences.getString("FAMILY_CONTACT", "") ?: ""
+                    val familyContact = if (checkNumber.matches("^\\+[0-9]{10,15}$".toRegex())) {
+                        checkNumber
+                    } else {
+                        "+91$checkNumber"
+                    }
+                    makePhoneCall(familyContact)
                 } else {
-                    Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -162,54 +182,19 @@ class Home : AppCompatActivity() {
         }, 2000)
     }
 
-    private fun startLocationUpdates() {
-        if (!::fusedLocationClient.isInitialized) {
-            Log.e("Home", "FusedLocationClient not initialized")
-            return
-        }
-
-        val locationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-    }
-
     private fun sendSMS(phoneNumber: String, location: String, userName: String, bloodGroup: String, healthConditions: String, gender: String, age: String) {
-        // Validate phone number format (e.g., +1234567890)
-        if (!phoneNumber.matches("^\\+[0-9]{10,15}$".toRegex())) {
-            Toast.makeText(this, "Invalid phone number format", Toast.LENGTH_SHORT).show()
-            Log.e("SMS", "Invalid phone number: $phoneNumber")
-            return
-        }
+        val message = "Please Help me! \n I am $userName \n I am $age \n My blood group -> $bloodGroup \n Location -> $location."
+        try {
+            val smsManager: SmsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
+            Log.d("SMS", "SMS triggered: $message")
+            Toast.makeText(this, "Help message sent", Toast.LENGTH_SHORT).show()
 
-        val message = "I need Help. I am $userName. I am $age years old $gender. My blood group is $bloodGroup. Health condition -> $healthConditions. Location -> $location"
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
-            val smsManager: SmsManager? = SmsManager.getDefault()
-            smsManager?.let {
-                try {
-                    it.sendTextMessage(phoneNumber, null, message, null, null)
-                    Toast.makeText(this, "Help message sent!", Toast.LENGTH_SHORT).show()
-                    Log.d("SMS", "SMS sent: $message")
-                } catch (e: Exception) {
-                    Log.e("SMS", "Failed to send SMS: ${e.message}", e)
-                    Toast.makeText(this, "Failed: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            } ?: run {
-                Log.e("SMS", "SmsManager is null")
-                Toast.makeText(this, "SMS service unavailable", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            // Re-request permission if denied earlier
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.SEND_SMS), SMS_PERMISSION_REQUEST_CODE)
-            Toast.makeText(this, "SMS permission required", Toast.LENGTH_SHORT).show()
+            // Verify delivery (optional)
+            val sentPI = PendingIntent.getBroadcast(this, 0, Intent("SMS_SENT"), PendingIntent.FLAG_IMMUTABLE)
+            smsManager.sendTextMessage(phoneNumber, null, message, sentPI, null)
+        } catch (e: Exception) {
+            Log.e("SMS", "Silent failure: ${e.message}")
         }
     }
 
@@ -236,16 +221,18 @@ class Home : AppCompatActivity() {
         }
     }
 
-    private fun showConfirmationDialog(phoneNumber: String, userName: String, bloodGroup: String, age: String, healthConditions: String, gender: String) {
+    private fun showConfirmationDialog(phoneNumber: String, userName: String, bloodGroup: String, age: String, healthConditions: String, gender: String, latitude: Float, longitude: Float) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Do you Need Help")
         builder.setMessage("Are you Sure!")
         builder.setPositiveButton("Yes") { _, _ ->
-            currentLocation?.let { loc ->
-                val locationUrl = "http://maps.google.com/?q=${loc.latitude},${loc.longitude}"
-                sendSMS(phoneNumber, locationUrl, userName, bloodGroup, healthConditions, gender, age)
+            val locationUrl = if (true) {
+                "http://maps.google.com/?q=${latitude},${longitude}"
+            } else {
+                "Location not available"
             }
-            Toast.makeText(this, "Help has been sent", Toast.LENGTH_SHORT).show()
+            sendSMS(phoneNumber, locationUrl, userName, bloodGroup, healthConditions, gender, age)
+            Toast.makeText(this, "Message sent", Toast.LENGTH_SHORT).show()
         }
         builder.setNegativeButton("No") { _, _ ->
             countdownTimer?.cancel()
@@ -262,18 +249,15 @@ class Home : AppCompatActivity() {
             override fun onFinish() {
                 if (currentLocation == null) {
                     Toast.makeText(this@Home, "Location not available. Retrying...", Toast.LENGTH_SHORT).show()
-                    // Retry after 2 seconds to get location
                     Handler(Looper.getMainLooper()).postDelayed({
                         currentLocation?.let { loc ->
-                            val url = "http://maps.google.com/?q=${loc.latitude},${loc.longitude}"
-                            sendSMS(phoneNumber, url, userName, bloodGroup, healthConditions, gender, age)
+                            // Use the location
                         } ?: run {
                             Toast.makeText(this@Home, "Failed to get location", Toast.LENGTH_SHORT).show()
                         }
                     }, 2000)
                 } else {
-                    val locationUrl = "http://maps.google.com/?q=${currentLocation!!.latitude},${currentLocation!!.longitude}"
-                    sendSMS(phoneNumber, locationUrl, userName, bloodGroup, healthConditions, gender, age)
+                    // Use the location
                 }
             }
         }.start()
@@ -281,22 +265,29 @@ class Home : AppCompatActivity() {
 
 
     fun vibe(v: View) {
-        val vibrate = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= 26) {
-            vibrate.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrate.vibrate(500)
+        val vibrate = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        vibrate?.let {
+            if (Build.VERSION.SDK_INT >= 26) {
+                it.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                it.vibrate(500)
+            }
+        } ?: run {
+            Toast.makeText(this, "Vibrator service not available", Toast.LENGTH_SHORT).show()
         }
     }
 
     companion object {
         private const val CALL_PHONE_PERMISSION_REQUEST_CODE = 1
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 100
-        private const val SMS_PERMISSION_REQUEST_CODE = 101 // Unique code for SMS
+        private const val SMS_PERMISSION_REQUEST_CODE = 101
     }
 }
 
-private fun Home.makePhoneCall(phoneNumber: String) {
+private fun Home.makePhoneCall(phoneNumber: String?) {
+    if (phoneNumber.isNullOrEmpty()) {
+        Toast.makeText(this, "Phone number is missing", Toast.LENGTH_SHORT).show()
+        return
+    }
     val callIntent = Intent(Intent.ACTION_CALL)
     callIntent.data = Uri.parse("tel:$phoneNumber")
     startActivity(callIntent)

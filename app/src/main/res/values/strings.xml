@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">TechOWare</string>
+    <string name="app_name" translatable="false">TechOWear</string>
     <string name="back_button">Back</string>
     <string name="welcome_back">Welcome Back</string>
     <string name="enter_your_email">Enter Your email</string>
@@ -45,7 +45,7 @@
     <string name="hospital">Hospital</string>
     <string name="call_for_help">Call For Help</string>
     <string name="location">Location</string>
-    <string name="check_pulse">Check Pulse</string>
+    <string name="check_pulse">Alert</string>
     <string name="save">Save</string>
     <string name="text_advice_for_image">Note* - For proper SOS service we advice you to use a clear image of yourself, with a proper disclosure of your front profile.</string>
     <string name="select_a_picture">Select A Picture</string>

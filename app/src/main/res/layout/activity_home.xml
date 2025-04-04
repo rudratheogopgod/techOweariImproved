@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".Home"
     app:layout_anchorGravity="center"
-    android:paddingVertical="40dp"
+    android:paddingTop="40dp"
     android:paddingHorizontal="20dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -45,15 +45,15 @@
     <ImageView
         android:id="@+id/slider"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="@dimen/_15dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="50dp"
         android:contentDescription="@string/slider"
         android:padding="3dp"
         android:background="@drawable/rounded_corners"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/profile_pic"
-        android:src="@drawable/dummy_image" />
+        android:src="@drawable/techowear_banner" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/emergency_button"
@@ -63,14 +63,14 @@
         android:text="@string/check_pulse"
         android:fontFamily="@font/work_sans_bold"
         android:textColor="@color/black"
-        app:icon="@drawable/emergency"
+        app:icon="@drawable/alert_icon"
         app:iconGravity="textTop"
-        app:iconSize="80dp"
+        app:iconSize="100dp"
         app:iconTint="@null"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/location_button"
         app:layout_constraintTop_toBottomOf="@id/slider"
-        android:layout_marginTop="50sp"
+        android:layout_marginTop="70sp"
         app:layout_constraintHorizontal_weight="1"/>
 
     <com.google.android.material.button.MaterialButton
@@ -81,14 +81,14 @@
         android:text="@string/location"
         android:fontFamily="@font/work_sans_bold"
         android:textColor="@color/black"
-        app:icon="@drawable/location"
+        app:icon="@drawable/location_blue"
         app:iconGravity="textTop"
-        app:iconSize="80dp"
+        app:iconSize="100dp"
         app:iconTint="@null"
         app:layout_constraintTop_toBottomOf="@id/slider"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@id/emergency_button"
-        android:layout_marginTop="50sp"
+        android:layout_marginTop="70sp"
         app:layout_constraintHorizontal_weight="1"/>
 
     <com.google.android.material.button.MaterialButton
@@ -96,11 +96,11 @@
         android:background="@drawable/home_button"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginTop="20sp"
+        android:layout_marginTop="40sp"
         android:text="@string/hospital"
         android:fontFamily="@font/work_sans_bold"
         android:textColor="@color/black"
-        app:icon="@drawable/hospital_icon"
+        app:icon="@drawable/hospital_blue"
         app:iconGravity="textTop"
         app:iconSize="80dp"
         app:iconTint="@null"
@@ -112,7 +112,7 @@
         android:id="@+id/police"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="33dp"
         android:text="@string/call_for_help"
         android:fontFamily="@font/work_sans_bold"
         android:textColor="@color/black"
@@ -124,7 +124,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toRightOf="@id/hospital"
         app:layout_constraintTop_toBottomOf="@id/location_button" />
-
 
 
 

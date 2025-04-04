@@ -10,4 +10,12 @@
 
 
     <style name="Theme.TestingApp" parent="Base.Theme.TestingApp" />
+
+    <style name="Theme.AppCompat.SplashScreen" parent = "Theme.SplashScreen">
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreenlogo1try</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.TestingApp</item>
+
+    </style>
+    
 </resources>
